@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pencarian Grup HRAC - Mode of Action Herbisida</title>
+<style>
+:root{--bg:#f5f7f3;--card:#fff;--ink:#1c2a1f;--muted:#5b6a5e;--green:#2f6b3a;--line:#dde5da;--soft:#eef5ec;--gold:#b77f12}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+header{background:var(--green);color:#fff;padding:22px 18px}
+header h1{margin:0;font-size:1.4rem}
+header p{margin:6px 0 0;opacity:.92;font-size:.93rem}
+main{max-width:880px;margin:0 auto;padding:18px}
+.search{position:relative}
+input[type=search]{width:100%;padding:15px 16px;font-size:1.05rem;border:2px solid var(--line);border-radius:12px;background:#fff;font-family:inherit}
+input[type=search]:focus{outline:none;border-color:var(--green)}
+.hint{color:var(--muted);font-size:.88rem;margin:8px 2px 0}
+.sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.09);z-index:10;max-height:340px;overflow:auto;display:none}
+.sug.open{display:block}
+.sug button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:11px 14px;border:0;background:none;cursor:pointer;font:inherit;color:inherit;gap:10px}
+.sug button:hover,.sug button.on{background:var(--soft)}
+.sug .al{color:var(--muted);font-size:.85rem}
+.pill{display:inline-block;background:var(--green);color:#fff;border-radius:8px;padding:2px 9px;font-weight:700;font-size:.9rem;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:18px}
+.card h2{margin:0 0 4px;font-size:1.25rem}
+.grp{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
+.grp .pill{font-size:1.05rem;padding:4px 12px}
+.legacy{background:#eef0e6;color:var(--muted);border-radius:8px;padding:3px 9px;font-size:.85rem}
+.moa-en{font-weight:600;margin:6px 0 2px}
+.moa-id{color:var(--ink);margin:0 0 10px}
+.desc{background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+.label{font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:.88rem;cursor:pointer;color:var(--ink)}
+.chips button:hover{border-color:var(--green);background:var(--soft)}
+.note{font-size:.85rem;color:var(--muted);margin-top:14px}
+.empty{color:var(--muted);margin-top:16px}
+h3.sec{margin:32px 0 10px;font-size:1.1rem}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+details summary{cursor:pointer;padding:12px 14px;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details[open] summary{border-bottom:1px solid var(--line)}
+details .body{padding:12px 14px;font-size:.92rem}
+footer{color:var(--muted);font-size:.84rem;margin:28px 0 40px;border-top:1px solid var(--line);padding-top:14px}
+a{color:var(--green)}
+.credit{font-size:.88rem;color:var(--muted);margin:0 2px 10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pencarian Grup HRAC - Mode of Action Herbisida</h1>
+  <p>Ketik nama bahan aktif dalam bahasa Indonesia atau Inggris, lalu lihat grup HRAC dan mode of action-nya.</p>
+</header>
+
+<main>
+  <div class="credit">Dibuat oleh <strong>Ari Budiawan</strong> &middot; aribudia@gmail.com</div>
+  <div class="search">
+    <input id="q" type="search" placeholder="Contoh: glifosat, glyphosate, parakuat, 2,4-D, pendimetalin..." autocomplete="off" aria-label="Nama bahan aktif">
+    <div id="sug" class="sug" role="listbox"></div>
+  </div>
+  <div class="hint">Tekan Enter untuk membuka hasil pertama. Anda juga bisa mengetik nomor grup, misalnya "grup 9".</div>
+
+  <div id="result"></div>
+
+  <h3 class="sec">Semua grup HRAC 2026</h3>
+  <div id="browse"></div>
+
+  <footer>
+    Data disusun dari poster <em>HRAC Mode of Action Classification 2026</em> (hracglobal.com). Penempatan beberapa bahan aktif
+    (misalnya aclonifen, tetflupyrolimet, bentazon, bromoksinil) perlu dicek ulang dengan daftar lengkap HRAC (file Excel) sebelum dijadikan rujukan resmi.
+    Selalu ikuti label produk dan regulasi setempat.
+  </footer>
+</main>
+
+<script>
+const GROUPS = {
+  "1":  {L:"A",    en:"Inhibition of Acetyl CoA Carboxylase (ACCase)", id:"Penghambatan Asetil-KoA Karboksilase (ACCase)", mo:"Menghambat ACCase sehingga pembentukan asam lemak untuk membran sel terhenti. Gejala umumnya terlihat pada gulma rumput (graminae)."},
+  "2":  {L:"B",    en:"Inhibition of Acetolactate Synthase (ALS)", id:"Penghambatan Asetolaktat Sintase (ALS)", mo:"Menghambat ALS sehingga sintesis asam amino rantai cabang (valin, leusin, isoleusin) terhenti. Grup dengan jumlah bahan aktif terbanyak, dan risiko resistensinya tinggi."},
+  "3":  {L:"K1",   en:"Inhibition of Microtubule Assembly / α-Tubulin", id:"Penghambatan Perakitan Mikrotubul / α-Tubulin", mo:"Mengikat α-tubulin dan menghambat perakitan mikrotubul, sehingga pembelahan sel dan pertumbuhan akar serta tunas terganggu."},
+  "4":  {L:"O",    en:"Auxin Mimics", id:"Peniru Auksin", mo:"Meniru hormon auksin alami sehingga pertumbuhan tidak terkendali, batang memelintir, dan jaringan rusak. Umumnya efektif pada gulma berdaun lebar."},
+  "5":  {L:"C1,2", en:"Inhibition of Photosynthesis at PS II - D1 Serine 264 binders (and other non-histidine 215 binders)", id:"Penghambatan Fotosintesis di Fotosistem II (pengikat D1 serin 264)", mo:"Menghambat transpor elektron di Fotosistem II sehingga fotosintesis berhenti dan radikal oksigen terbentuk."},
+  "6":  {L:"C3",   en:"Inhibition of Photosynthesis at PS II - D1 Histidine 215 binders", id:"Penghambatan Fotosintesis di Fotosistem II (pengikat D1 histidin 215)", mo:"Menghambat Fotosistem II pada situs D1 histidin 215. Beberapa anggotanya (nitril) juga bersifat uncoupler."},
+  "9":  {L:"G",    en:"Inhibition of Enolpyruvyl Shikimate Phosphate Synthase (EPSPS)", id:"Penghambatan Enolpiruvil Shikimat Fosfat Sintase (EPSPS)", mo:"Menghambat EPSPS pada jalur shikimat sehingga sintesis asam amino aromatik (fenilalanin, tirosin, triptofan) terhenti."},
+  "10": {L:"H",    en:"Inhibition of Glutamine Synthetase (GS)", id:"Penghambatan Glutamin Sintetase (GS)", mo:"Menghambat glutamin sintetase sehingga amonia menumpuk dan asimilasi nitrogen terganggu."},
+  "12": {L:"F1",   en:"Inhibition of Phytoene Desaturase (PDS)", id:"Penghambatan Fitoen Desaturase (PDS)", mo:"Menghambat PDS sehingga karotenoid tidak terbentuk dan klorofil rusak. Gejala yang khas adalah memutih (bleaching)."},
+  "13": {L:"F4",   en:"Inhibition of Deoxy-D-Xylulose Phosphate Synthase (DXPS)", id:"Penghambatan Deoksi-D-Xilulosa Fosfat Sintase (DXPS)", mo:"Menghambat DXPS pada jalur biosintesis isoprenoid dan pigmen sehingga gulma memutih (bleaching)."},
+  "14": {L:"E",    en:"Inhibition of Protoporphyrinogen Oxidase (PPO)", id:"Penghambatan Protoporfirinogen Oksidase (PPO)", mo:"Menghambat PPO sehingga protoporfirin menumpuk dan memicu radikal oksigen yang merusak membran sel dengan cepat."},
+  "15": {L:"K3",   en:"Inhibition of Very Long-Chain Fatty Acid Synthesis (VLCFA)", id:"Penghambatan Sintesis Asam Lemak Rantai Sangat Panjang (VLCFA)", mo:"Menghambat sintesis VLCFA sehingga pertumbuhan tunas dan akar terhambat. Umumnya digunakan pra-tumbuh."},
+  "18": {L:"I",    en:"Inhibition of Dihydropteroate Synthase (DHPS)", id:"Penghambatan Dihidropteroat Sintase (DHPS)", mo:"Menghambat DHPS sehingga sintesis folat terganggu."},
+  "19": {L:"P",    en:"Auxin Transport Inhibitors", id:"Penghambat Transpor Auksin", mo:"Menghambat transpor auksin sehingga auksin menumpuk di jaringan tertentu dan pertumbuhan terganggu."},
+  "22": {L:"D",    en:"PS I Electron Diversion", id:"Pengalihan Elektron di Fotosistem I", mo:"Mengalihkan elektron di Fotosistem I sehingga radikal oksigen terbentuk dan merusak membran sel dengan cepat."},
+  "23": {L:"K2",   en:"Microtubule Interference - Unclear Site of Action", id:"Gangguan Mikrotubul - Situs Kerja Belum Jelas", mo:"Mengganggu mikrotubul, tetapi situs kerjanya belum sepenuhnya jelas."},
+  "27": {L:"F2",   en:"Inhibition of Hydroxyphenyl Pyruvate Dioxygenase (HPPD)", id:"Penghambatan Hidroksifenil Piruvat Dioksigenase (HPPD)", mo:"Menghambat HPPD sehingga plastokuinon dan karotenoid tidak terbentuk. Gejala yang khas adalah memutih (bleaching)."},
+  "28": {L:"none", en:"Inhibition of Dihydroorotate Dehydrogenase (DHODH)", id:"Penghambatan Dihidroorotat Dehidrogenase (DHODH)", mo:"Menghambat DHODH sehingga sintesis pirimidin terganggu. Grup ini baru dan tidak memiliki kode legacy."},
+  "29": {L:"L",    en:"Inhibition of Cellulose Synthesis", id:"Penghambatan Sintesis Selulosa", mo:"Menghambat sintesis selulosa sehingga dinding sel tidak terbentuk normal."},
+  "30": {L:"Q",    en:"Inhibition of Fatty Acid Thioesterase (FAT)", id:"Penghambatan Tioesterase Asam Lemak (FAT)", mo:"Menghambat FAT sehingga sintesis asam lemak terganggu."},
+  "32": {L:"S",    en:"Inhibition of Solanesyl Diphosphate Synthase (SDPS)", id:"Penghambatan Solanesil Difosfat Sintase (SDPS)", mo:"Menghambat SDPS sehingga plastokuinon tidak terbentuk dengan baik."},
+  "33": {L:"T",    en:"Inhibition of Homogentisate Solanesyltransferase (HST)", id:"Penghambatan Homogentisat Solanesiltransferase (HST)", mo:"Menghambat HST sehingga sintesis plastokuinon terganggu."},
+  "0":  {L:"Z",    en:"Unknown Mode of Action", id:"Mekanisme Kerja Tidak Diketahui", mo:"Mekanisme kerja belum diketahui, bersifat multisite, atau data belum meyakinkan. Contoh: MSMA, asam pelargonat, amitrol."}
+};
+const GROUP_ORDER = ["1","2","3","4","5","6","9","10","12","13","14","15","18","19","22","23","27","28","29","30","32","33","0"];
+
+// [nama bahan aktif, alias (Indonesia/lainnya), grup, famili kimia]
+const ACT = [
+  ["Clethodim",["kletodim"],"1","Cyclohexanediones"],["Cycloxydim",["siklosidim"],"1","Cyclohexanediones"],["Profoxydim",[],"1","Cyclohexanediones"],["Sethoxydim",["setoksidim"],"1","Cyclohexanediones"],["Tralkoxydim",["tralkoksidim"],"1","Cyclohexanediones"],
+  ["Clodinafop-propargyl",["klodinafop"],"1","Aryloxyphenoxypropionates"],["Cyhalofop-butyl",["sihalofop"],"1","Aryloxyphenoxypropionates"],["Diclofop-methyl",["diklofop"],"1","Aryloxyphenoxypropionates"],["Fenoxaprop-P-ethyl",["fenoksaprop","fenoxaprop"],"1","Aryloxyphenoxypropionates"],["Fluazifop-P-butyl",["fluazifop","fluazifop-butil"],"1","Aryloxyphenoxypropionates"],["Haloxyfop-methyl",["haloksifop"],"1","Aryloxyphenoxypropionates"],["Metamifop",["metamifop"],"1","Aryloxyphenoxypropionates"],["Quizalofop-ethyl",["kuizalofop","quizalofop"],"1","Aryloxyphenoxypropionates"],["Propaquizafop",["propakuizafop"],"1","Aryloxyphenoxypropionates"],["Pinoxaden",["pinoksaden"],"1","Phenylpyrazolin"],
+  ["Imazethapyr",["imazetapir"],"2","Imidazolinones"],["Imazapyr",["imazapir"],"2","Imidazolinones"],["Imazapic",[],"2","Imidazolinones"],["Imazamox",[],"2","Imidazolinones"],
+  ["Chlorimuron-ethyl",["klorimuron"],"2","Sulfonylureas"],["Chlorsulfuron",["klorsulfuron"],"2","Sulfonylureas"],["Nicosulfuron",["nikosulfuron"],"2","Sulfonylureas"],["Metsulfuron-methyl",["metsulfuron"],"2","Sulfonylureas"],["Bensulfuron-methyl",["bensulfuron"],"2","Sulfonylureas"],["Rimsulfuron",[],"2","Sulfonylureas"],["Tribenuron-methyl",["tribenuron"],"2","Sulfonylureas"],["Triasulfuron",[],"2","Sulfonylureas"],["Sulfosulfuron",[],"2","Sulfonylureas"],["Halosulfuron-methyl",["halosulfuron"],"2","Sulfonylureas"],["Pyrazosulfuron-ethyl",["pirazosulfuron"],"2","Sulfonylureas"],["Cyclosulfamuron",["siklosulfamuron"],"2","Sulfonylureas"],["Ethoxysulfuron",["etoksisulfuron"],"2","Sulfonylureas"],["Foramsulfuron",[],"2","Sulfonylureas"],["Flazasulfuron",[],"2","Sulfonylureas"],["Iodosulfuron-methyl-sodium",["yodosulfuron"],"2","Sulfonylureas"],["Mesosulfuron-methyl",["mesosulfuron"],"2","Sulfonylureas"],["Azimsulfuron",[],"2","Sulfonylureas"],["Cinosulfuron",[],"2","Sulfonylureas"],["Imazosulfuron",[],"2","Sulfonylureas"],["Sulfometuron-methyl",["sulfometuron"],"2","Sulfonylureas"],["Orthosulfamuron",[],"2","Sulfonylureas"],["Trifloxysulfuron-sodium",["trifloksisulfuron"],"2","Sulfonylureas"],["Prosulfuron",["prosulfuron"],"2","Sulfonylureas"],["Triflusulfuron-methyl",["triflusulfuron"],"2","Sulfonylureas"],["Thifensulfuron-methyl",["tifensulfuron"],"2","Sulfonylureas"],["Amidosulfuron",["amidosulfuron"],"2","Sulfonylureas"],["Flupyrsulfuron-methyl-sodium",["flupirsulfuron"],"2","Sulfonylureas"],["Metazosulfuron",[],"2","Sulfonylureas"],["Flucetosulfuron",[],"2","Sulfonylureas"],["Propyrisulfuron",[],"2","Sulfonylureas"],["Tritosulfuron",[],"2","Sulfonylureas"],["Ethametsulfuron-methyl",["etametsulfuron"],"2","Sulfonylureas"],["Mesosulfuron",[],"2","Sulfonylureas"],
+  ["Penoxsulam",["penoksulam"],"2","Triazolopyrimidines"],["Pyroxsulam",["piroksulam"],"2","Triazolopyrimidines"],["Florasulam",["florasulam"],"2","Triazolopyrimidines"],["Flumetsulam",["flumetsulam"],"2","Triazolopyrimidines"],["Diclosulam",["diklosulam"],"2","Sulfonanilides"],["Cloransulam-methyl",["kloransulam"],"2","Sulfonanilides"],["Bispyribac-sodium",["bispiribak"],"2","Pyrimidinylbenzoates"],["Pyriminobac-methyl",["pirimenobak"],"2","Pyrimidinylbenzoates"],["Pyribenzoxim",["piribenzoksim"],"2","Pyrimidinylbenzoates"],["Pyrithiobac-sodium",["pirithiobak"],"2","Pyrimidinylbenzoates"],["Pyriftalid",["piriftalid"],"2","Pyrimidinylbenzoates"],["Pyrimisulfan",["pirimisulfan"],"2","Pyrimidinylbenzoates"],["Triafamone",["triafamon"],"2","Pyrimidinylbenzoates"],["Propoxycarbazone-sodium",["propoksikarbazon"],"2","Triazolinones"],["Thiencarbazone-methyl",["tiensarbazon"],"2","Triazolinones"],["Flucarbazone-sodium",["flukarbazon"],"2","Triazolinones"],
+  ["Benfluralin",["benfluralin"],"3","Dinitroanilines"],["Butralin",["butralin"],"3","Dinitroanilines"],["Pendimethalin",["pendimetalin","pendimetilin"],"3","Dinitroanilines"],["Prodiamine",["prodiamin"],"3","Dinitroanilines"],["Ethalfluralin",["etalfluralin"],"3","Dinitroanilines"],["Trifluralin",["triflurarin","trifluralin"],"3","Dinitroanilines"],["Dithiopyr",["ditiopir"],"3","Pyridines"],["Butamifos",["butamifos"],"3","Phosphoroamidates"],["Propyzamide",["propisamid","pronamide","pronamid"],"3","Benzamides"],["Chlorthal-dimethyl",["DCPA","klortal-dimetil"],"3","Phthalates"],
+  ["2,4-D",["2 4 d","24d","2,4 d"],"4","Phenoxycarboxylates"],["2,4-DB",["24db"],"4","Phenoxycarboxylates"],["Dichlorprop",["diklorprop"],"4","Phenoxycarboxylates"],["Mecoprop",["mekoprop","mcpp"],"4","Phenoxycarboxylates"],["MCPA",["mcpa"],"4","Phenoxycarboxylates"],["MCPB",["mcpb"],"4","Phenoxycarboxylates"],["Dicamba",["dikamba"],"4","Benzoates"],["Picloram",["pikloram"],"4","6-Chloropicolinates"],["Clopyralid",["klopiralid"],"4","6-Chloropicolinates"],["Aminopyralid",["aminopiralid"],"4","6-Chloropicolinates"],["Halauxifen-methyl",["halauksifen"],"4","6-Arylpicolinates"],["Florpyrauxifen-benzyl",["florpirauksifen"],"4","6-Arylpicolinates"],["Triclopyr",["triklopir"],"4","Pyridyloxycarboxylates"],["Fluroxypyr",["fluroksipir"],"4","Pyridyloxycarboxylates"],["Quinclorac",["kuinklorak"],"4","Quinolinecarboxylates"],["Quinmerac",["kuinmerak"],"4","Quinolinecarboxylates"],["Aminocyclopyrachlor",["aminosiklopirakhlor"],"4","6-Chloropicolinates"],["Benazolin",["benazolin"],"4","Benzothiazolone"],
+  ["Atrazine",["atrazin"],"5","Triazines"],["Simazine",["simazin"],"5","Triazines"],["Cyanazine",["sianazin"],"5","Triazines"],["Ametryne",["ametrin"],"5","Triazines"],["Prometryne",["prometrin"],"5","Triazines"],["Propazine",["propazin"],"5","Triazines"],["Terbuthylazine",["terbutilazin"],"5","Triazines"],["Terbutryne",["terbutrin"],"5","Triazines"],["Dimethametryn",["dimetametrin"],"5","Triazines"],["Chlorotoluron",["klorotoluron"],"5","Ureas"],["Diuron",["diuron"],"5","Ureas"],["Fluometuron",["flumeturon"],"5","Ureas"],["Isoproturon",["isoproturon"],"5","Ureas"],["Linuron",["linuron"],"5","Ureas"],["Metobromuron",["metobromuron"],"5","Ureas"],["Tebuthiuron",["tebutiuron"],"5","Ureas"],["Bromacil",["bromasil"],"5","Uracils"],["Lenacil",["lenasil"],"5","Uracils"],["Terbacil",["terbasil"],"5","Uracils"],["Desmedipham",["desmedifam"],"5","Phenylcarbamates"],["Phenmedipham",["fenmedifam"],"5","Phenylcarbamates"],["Propanil",["propanil"],"5","Amides"],["Hexazinone",["heksazinon"],"5","Triazinones"],["Metamitron",["metamitron"],"5","Triazinones"],["Metribuzin",["metribuzin"],"5","Triazinones"],["Chloridazon",["klorida zon","pyrazon"],"5","Pyridazinones"],["Amicarbazone",["amikarbazon"],"5","Triazolinones"],
+  ["Bentazon",["bentazon"],"6","Nitriles / uncoupler"],["Bromoxynil",["bromoksinil"],"6","Nitriles / uncoupler"],["Ioxynil",["ioksinil"],"6","Nitriles / uncoupler"],["Pyridate",["piridat"],"6","Nitriles / uncoupler"],
+  ["Glyphosate",["glifosat","roundup"],"9","Glycines"],
+  ["Glufosinate-ammonium",["glufosinat","glufosinat amonium","phosphinothricin"],"10","Phosphinic acids"],
+  ["Flurochloridone",["flurokloridon"],"12","Diphenyl heterocycles"],["Fluridone",["fluridon"],"12","Diphenyl heterocycles"],["Flurtamone",["flurtamon"],"12","Diphenyl heterocycles"],["Beflubutamid",["beflubutamid"],"12","Phenylethers"],["Diflufenican",["diflufenikan"],"12","Phenylethers"],["Picolinafen",["pikolinafen"],"12","Phenylethers"],["Norflurazon",["norflurazon"],"12","N-Phenyl heterocycles"],
+  ["Clomazone",["klomazon"],"13","Isoxazolidinones"],["Bixlozone",["bikslozon"],"13","Isoxazolidinones"],
+  ["Lactofen",["laktofen"],"14","Diphenyl ethers"],["Acifluorfen",["asifluorfen"],"14","Diphenyl ethers"],["Bifenox",["bifenoks"],"14","Diphenyl ethers"],["Fomesafen",["fomesafen"],"14","Diphenyl ethers"],["Oxyfluorfen",["oksifluorfen"],"14","Diphenyl ethers"],["Oxadiargyl",["oksadiargil"],"14","N-Phenyloxadiazolones"],["Oxadiazon",["oksadiazon"],"14","N-Phenyloxadiazolones"],["Carfentrazone-ethyl",["karfentrazon"],"14","N-Phenyltriazolinones"],["Sulfentrazone",["sulfentrazon"],"14","N-Phenyltriazolinones"],["Pentoxazone",["pentoksazon"],"14","N-Phenyloxadiazolones"],["Flumiclorac-pentyl",["flumiklorak"],"14","N-Phenylimides"],["Flumioxazin",["flumioksazin"],"14","N-Phenylimides"],["Tiafenacil",["tiafenasil"],"14","Pyrimidinediones"],["Trifludimoxazin",["trifludimoksazin"],"14","N-Phenylimides"],["Pyraclonil",["pirakloonil"],"14","Pyrazoles"],["Pyraflufen-ethyl",["pirafluren"],"14","Phenylpyrazoles"],["Saflufenacil",["saflufenasil"],"14","Pyrimidinediones"],["Epyrifenacil",["epirifenasil"],"14","Pyrimidinediones"],["Fluthiacet-methyl",["flutiasetmetil"],"14","N-Phenylimides"],
+  ["Acetochlor",["asetoklor"],"15","α-Chloroacetamides"],["Alachlor",["alaklor"],"15","α-Chloroacetamides"],["Dimethenamid",["dimetenamid"],"15","α-Chloroacetamides"],["Metolachlor",["metolaklor"],"15","α-Chloroacetamides"],["Metazachlor",["metazaklor"],"15","α-Chloroacetamides"],["Pretilachlor",["pretilaklor"],"15","α-Chloroacetamides"],["Dimethachlor",["dimetaklor"],"15","α-Chloroacetamides"],["Butachlor",["butaklor"],"15","α-Chloroacetamides"],["Propisochlor",["propisoklor"],"15","α-Chloroacetamides"],["Flufenacet",["flufenasetat","flufenasetes"],"15","Oxyacetamides"],["Mefenacet",["mefenasetat"],"15","α-Thioacetamides"],["Pethoxamid",["petoksamid"],"15","α-Chloroacetamides"],["Anilofos",["anilofos"],"15","α-Thioacetamides"],["Triallate",["trialat"],"15","Thiocarbamates"],["Thiobencarb",["tiobenkarb"],"15","Thiocarbamates"],["Benthiocarb",["benthiokarb"],"15","Thiocarbamates"],["Prosulfocarb",["prosulfokarb"],"15","Thiocarbamates"],["Molinate",["molinat"],"15","Thiocarbamates"],["EPTC",["eptc"],"15","Thiocarbamates"],["Esprocarb",["esprokarb"],"15","Thiocarbamates"],["Benfuresate",["benfuresat"],"15","Benzofuranes"],["Ethofumesate",["etofumesat"],"15","Benzofuranes"],["Fenoxasulfone",["fenoksasulfon"],"15","Isoxazolines"],["Pyroxasulfone",["piroksasulfon"],"15","Isoxazolines"],["Ipfencarbazone",["ipfenkarbazon"],"15","Triazolinones"],["Cafenstrole",["kafenstrol"],"15","Azolylcarboxamides"],["Fentrazamide",["fentrazamid"],"15","Azolylcarboxamides"],
+  ["Asulam",["asulam"],"18","Carbamates"],
+  ["Diflufenzopyr",["diflufenzopir"],"19","Arylcarboxylates"],
+  ["Paraquat",["parakuat"],"22","Pyridiniums"],["Diquat",["dikuat"],"22","Pyridiniums"],
+  ["Chlorpropham",["klorpropam"],"23","Carbamates"],["Carbetamide",["karbetamid"],"23","Carbamates"],
+  ["Mesotrione",["mesotrion"],"27","Triketones"],["Tembotrione",["tembotrion"],"27","Triketones"],["Sulcotrione",["sulkotrion"],"27","Triketones"],["Tefuryltrione",["tefuriltrion"],"27","Triketones"],["Bicyclopyrone",["bisiklopiron"],"27","Triketones"],["Fenquinotrione",["fenkinotrion"],"27","Triketones"],["Benzobicyclon",["benzobisiklon"],"27","Triketones"],["Benzofenap",["benzofenap"],"27","Pyrazoles"],["Pyrasulfotole",["pirasulfotol"],"27","Pyrazoles"],["Topramezone",["topramezon"],"27","Pyrazoles"],["Pyrazolynate",["pirazolinat"],"27","Pyrazoles"],["Tolpyralate",["tolpiralat"],"27","Pyrazoles"],["Cyclopyrimorate",["siklopirimorat"],"27","Pyrimidines"],["Isoxaflutole",["isoksaflutol"],"27","Isoxazoles"],
+  ["Tetflupyrolimet",["tetflupirolimet"],"28","Pyridines"],
+  ["Indaziflam",["indaziflam"],"29","Alkylazines"],["Triaziflam",["triaziflam"],"29","Alkylazines"],["Dichlobenil",["diklobenil"],"29","Nitriles"],["Isoxaben",["isoksaben"],"29","Benzamides"],["Flupoxam",["flupoksam"],"29","Benzamides"],
+  ["Cinmethylin",["sinmetilin"],"30","Benzyl ethers"],["Methiozolin",["metiozolin"],"30","Benzyl ethers"],["Bromobutide",["bromobutid"],"30","Benzamides"],["Cumyluron",["kumiluron"],"30","Benzamides"],["Oxaziclomefone",["oksasiklomefon"],"30","Benzamides"],
+  ["Aclonifen",["aklonifen"],"33","Diphenyl ethers"],
+  ["MSMA",["msma"],"0","Organoarsenicals"],["Pelargonic acid",["asam pelargonat","pelargonat"],"0","Fatty acids"],["Amitrole",["amitrol","amitrole"],"0","Triazoles"],["Napropamide",["napropamid"],"0","Amides"],["Bensulide",["bensulid"],"0","Organophosphates"]
+];
+
+const $ = id => document.getElementById(id);
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const gLabel = g => g === "0" ? "Ø" : g;
+const gKey = g => g === "0" ? "unknown" : g;
+
+const INDEX = ACT.map(a => ({a, keys: [a[0], ...a[1]].map(norm)}));
+
+function search(raw){
+  const q = norm(raw);
+  if(!q) return [];
+  const res = [];
+  for(const {a, keys} of INDEX){
+    let best = -1;
+    for(const k of keys){
+      if(!k) continue;
+      if(k === q){ best = 0; break; }
+      if(k.startsWith(q) && q.length >= 2){ best = best < 0 ? 1 : Math.min(best,1); }
+      else if(q.length >= 3 && k.includes(q)){ best = best < 0 ? 2 : Math.min(best,2); }
+    }
+    if(best >= 0) res.push({a, score: best});
+  }
+  res.sort((x,y) => x.score - y.score || x.a[0].localeCompare(y.a[0]));
+  return res.slice(0, 10).map(r => r.a);
+}
+
+function showGroupById(g, activeName){
+  if(!GROUPS[g]) return;
+  const G = GROUPS[g];
+  const members = ACT.filter(a => a[2] === g).map(a => a[0]);
+  const hash = "grup-" + gKey(g);
+  if(location.hash !== "#" + hash) history.replaceState(null, "", "#" + hash);
+  const head = activeName
+    ? `<h2>${esc(activeName)}</h2><div class="grp"><span class="pill">Grup HRAC ${esc(gLabel(g))}</span><span class="legacy">Kode lama: ${esc(G.L)}</span></div>`
+    : `<h2>Grup HRAC ${esc(gLabel(g))}</h2><div class="grp"><span class="legacy">Kode lama: ${esc(G.L)}</span></div>`;
+  const others = members.filter(n => n !== activeName);
+  const chips = others.length
+    ? `<div class="label">Bahan aktif lain dalam grup ini</div><div class="chips">${others.map(n => `<button data-name="${esc(n)}">${esc(n)}</button>`).join("")}</div>`
+    : (members.length ? "" : `<p class="empty">Belum ada contoh bahan aktif untuk grup ini dalam poster 2026.</p>`);
+  $("result").innerHTML = `<div class="card">
+    ${head}
+    <div class="moa-en">${esc(G.en)}</div>
+    <p class="moa-id">${esc(G.id)}</p>
+    <div class="desc"><strong>Cara kerja:</strong> ${esc(G.mo)}</div>
+    ${chips}
+    <p class="note">Sumber: HRAC Mode of Action Classification 2026. Ikuti label produk dan rotasi grup untuk mengurangi risiko resistensi.</p>
+  </div>`;
+  $("result").querySelectorAll("button[data-name]").forEach(b => b.addEventListener("click", () => selectActive(b.dataset.name)));
+  $("sug").classList.remove("open");
+}
+
+function selectActive(name){
+  const a = ACT.find(x => x[0] === name);
+  if(!a) return;
+  $("q").value = a[0];
+  showGroupById(a[2], a[0]);
+}
+
+let sugItems = [], sugIdx = -1;
+function renderSug(){
+  const list = $("sug");
+  const q = $("q").value.trim();
+  sugItems = search(q);
+  sugIdx = sugItems.length ? 0 : -1;
+  if(!q){ list.classList.remove("open"); list.innerHTML = ""; return; }
+  if(!sugItems.length){
+    list.innerHTML = `<div class="sug-empty" style="padding:12px 14px;color:#5b6a5e">Bahan aktif tidak ditemukan. Coba nama lain atau nama generik (INN).</div>`;
+    list.classList.add("open");
+    return;
+  }
+  list.innerHTML = sugItems.map((a,i) => `<button data-i="${i}" class="${i===sugIdx?'on':''}"><span>${esc(a[0])}${a[1].length ? ` <span class="al">${esc(a[1][0])}</span>` : ""}</span><span class="pill">Grup ${esc(gLabel(a[2]))}</span></button>`).join("");
+  list.querySelectorAll("button").forEach(b => b.addEventListener("mousedown", e => { e.preventDefault(); selectActive(sugItems[+b.dataset.i][0]); }));
+  list.classList.add("open");
+}
+
+$("q").addEventListener("input", renderSug);
+$("q").addEventListener("keydown", e => {
+  if(e.key === "ArrowDown" && sugItems.length){ sugIdx = (sugIdx+1) % sugItems.length; renderSug(); e.preventDefault(); }
+  else if(e.key === "ArrowUp" && sugItems.length){ sugIdx = (sugIdx-1+sugItems.length) % sugItems.length; renderSug(); e.preventDefault(); }
+  else if(e.key === "Enter"){
+    const q = $("q").value.trim();
+    const m = q.match(/^(?:grup\s*)?(\d{1,2})$/i);
+    if(m && GROUPS[m[1]]){ showGroupById(m[1]); return; }
+    if(sugItems.length){ selectActive(sugItems[sugIdx >= 0 ? sugIdx : 0][0]); }
+  }
+  else if(e.key === "Escape"){ $("sug").classList.remove("open"); }
+});
+document.addEventListener("click", e => { if(!e.target.closest(".search")) $("sug").classList.remove("open"); });
+
+function renderBrowse(){
+  $("browse").innerHTML = GROUP_ORDER.map(g => {
+    const G = GROUPS[g];
+    const members = ACT.filter(a => a[2] === g).map(a => a[0]);
+    return `<details id="grup-${gKey(g)}"><summary>Grup ${esc(gLabel(g))} (kode lama ${esc(G.L)}) - ${esc(G.en)}</summary>
+      <div class="body"><p><strong>Id:</strong> ${esc(G.id)}</p><p>${esc(G.mo)}</p>
+      ${members.length ? `<div class="chips">${members.map(n => `<button data-name="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : "<em>Belum ada contoh.</em>"}
+      </div></details>`;
+  }).join("");
+  $("browse").querySelectorAll("button[data-name]").forEach(b => b.addEventListener("click", () => selectActive(b.dataset.name)));
+}
+
+function routeFromHash(){
+  const m = location.hash.match(/^#grup-(\d{1,2}|unknown)$/);
+  if(!m) return;
+  const g = m[1] === "unknown" ? "0" : m[1];
+  if(GROUPS[g]) showGroupById(g);
+}
+window.addEventListener("hashchange", routeFromHash);
+renderBrowse();
+routeFromHash();
+</script>
+</body>
+</html>
