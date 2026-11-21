@@ -1,6 +1,6 @@
 {
   "name": "Pencarian Grup HRAC",
-  "short_name": "HRAC",
+  "short_name": "Herbisidaku",
   "description": "Cari grup HRAC dan mode of action herbisida dari nama bahan aktif (Indonesia/Inggris).",
   "start_url": "./",
   "scope": "./",
