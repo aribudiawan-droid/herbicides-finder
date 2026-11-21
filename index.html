@@ -130,6 +130,27 @@ const ACT = [
   ["MSMA",["msma"],"0","Organoarsenicals"],["Pelargonic acid",["asam pelargonat","pelargonat"],"0","Fatty acids"],["Amitrole",["amitrol","amitrole"],"0","Triazoles"],["Napropamide",["napropamid"],"0","Amides"],["Bensulide",["bensulid"],"0","Organophosphates"]
 ];
 
+let actx = null;
+function tone(f, t0, dur, type = "sine", vol = 0.15){
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t0); o.stop(t0 + dur);
+}
+// ok = ditemukan / bahan aktif dipilih, miss = tidak ditemukan, click = menu dibuka/ditutup
+function beep(kind){
+  try{
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if(actx.state === "suspended") actx.resume();
+    const t = actx.currentTime;
+    if(kind === "ok"){ tone(880, t, 0.12); tone(1320, t + 0.13, 0.18); }
+    else if(kind === "miss"){ tone(220, t, 0.3, "square", 0.08); }
+    else { tone(660, t, 0.06, "triangle", 0.1); }
+  }catch(e){}
+}
+
 const $ = id => document.getElementById(id);
 const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -185,6 +206,7 @@ function selectActive(name){
   const a = ACT.find(x => x[0] === name);
   if(!a) return;
   $("q").value = a[0];
+  beep("ok");
   showGroupById(a[2], a[0]);
 }
 
@@ -214,6 +236,7 @@ $("q").addEventListener("keydown", e => {
     const m = q.match(/^(?:grup\s*)?(\d{1,2})$/i);
     if(m && GROUPS[m[1]]){ showGroupById(m[1]); return; }
     if(sugItems.length){ selectActive(sugItems[sugIdx >= 0 ? sugIdx : 0][0]); }
+    else { beep("miss"); }
   }
   else if(e.key === "Escape"){ $("sug").classList.remove("open"); }
 });
@@ -229,6 +252,7 @@ function renderBrowse(){
       </div></details>`;
   }).join("");
   $("browse").querySelectorAll("button[data-name]").forEach(b => b.addEventListener("click", () => selectActive(b.dataset.name)));
+  $("browse").querySelectorAll("details").forEach(d => d.addEventListener("toggle", () => beep("click")));
 }
 
 function routeFromHash(){
